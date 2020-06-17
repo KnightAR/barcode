@@ -74,9 +74,24 @@ class DNS2D {
 
     /**
      * path to save png in getBarcodePNGPath
-     * @var <type>
+     * @var string
      */
     protected $store_path;
+
+    /**
+     * Transparent BG on/off, Default True
+     * @var bool
+     * @protected
+     */
+    protected $transparency = true;
+
+    /**
+     * Transparent BG on/off, Default True
+     * @var bool
+     * @protected
+     */
+    protected $ttfont = null;
+
 
     /**
      * Return a SVG string representation of barcode.
@@ -175,12 +190,18 @@ class DNS2D {
      * @param $w (int) Width of a single rectangle element in pixels.
      * @param $h (int) Height of a single rectangle element in pixels.
      * @param $color (array) RGB (0-255) foreground color for bar elements (background is transparent).
+     * @param $with_text (string) Show Code as text below the barcode
      * @return path or false in case of error.
      * @protected
      */
-    public function getBarcodePNG($code, $type, $w = 3, $h = 3, $color = array(0, 0, 0)) {
+    public function getBarcodePNG($code, $type, $w = 3, $h = 3, $color = array(0, 0, 0), $with_text = false) {
         if (!$this->store_path) {
             $this->setStorPath(app('config')->get("barcode.store_path"));
+        }
+        if (is_null($this->ttfont)) {
+            $with_text = false;
+        } elseif ($with_text === true) {
+            $with_text = $code;
         }
         //set barcode code and type
         $this->setBarcode($code, $type);
@@ -190,16 +211,16 @@ class DNS2D {
         if (function_exists('imagecreate')) {
             // GD library
             $imagick = false;
-            $png = imagecreate($width, $height);
+            $png = imagecreate($width, $height + ($with_text ? 15 : 0));
             $bgcol = imagecolorallocate($png, 255, 255, 255);
-            imagecolortransparent($png, $bgcol);
+            if ($this->transparency) { imagecolortransparent($png, $bgcol); }
             $fgcol = imagecolorallocate($png, $color[0], $color[1], $color[2]);
         } elseif (extension_loaded('imagick')) {
             $imagick = true;
             $bgcol = new \imagickpixel('rgb(255,255,255');
             $fgcol = new \imagickpixel('rgb(' . $color[0] . ',' . $color[1] . ',' . $color[2] . ')');
             $png = new \Imagick();
-            $png->newImage($width, $height, 'none', 'png');
+            $png->newImage($width, $height + ($with_text ? 15 : 0), ($this->transparency ? 'none' : $bgcol), 'png');
             $bar = new \imagickdraw();
             $bar->setfillcolor($fgcol);
         } else {
@@ -226,11 +247,17 @@ class DNS2D {
         }
         ob_start();
         // get image out put
-
         if ($imagick) {
             $png->drawimage($bar);
             echo $png;
         } else {
+            if ($with_text) {
+                // Print Text On Image
+                $tb = imagettfbbox(12, 0, $this->ttfont, $with_text);
+                $x = $tb[0] + (imagesx($png) / 2) - ($tb[4] / 2) - 0;
+                $y = imagesy($png) - 1;
+                imagettftext($png, 12, 0, $x, $y, $fgcol, $this->ttfont, $with_text);
+            }
             imagepng($png);
             imagedestroy($png);
         }
@@ -247,11 +274,12 @@ class DNS2D {
      * @param $w (int) Width of a single bar element in pixels.
      * @param $h (int) Height of a single bar element in pixels.
      * @param $color (array) RGB (0-255) foreground color for bar elements (background is transparent).
+     * @param $with_text (string) Show Code as text below the barcode
      * @return url or false in case of error.
      * @protected
      */
-    protected function getBarcodePNGUri($code, $type, $w = 3, $h = 3, $color = array(0, 0, 0)) {
-        $path = $this->getBarcodePNGPath($code, $type, $w, $h, $color);
+    protected function getBarcodePNGUri($code, $type, $w = 3, $h = 3, $color = array(0, 0, 0), $with_text = false) {
+        $path = $this->getBarcodePNGPath($code, $type, $w, $h, $color, $with_text);
         // Replace backslash (Windows) with forward slashes, to make it compatible with url().
         return url(str_replace('\\', '/', $path));
     }
@@ -267,12 +295,18 @@ class DNS2D {
      * @param $w (int) Width of a single rectangle element in pixels.
      * @param $h (int) Height of a single rectangle element in pixels.
      * @param $color (array) RGB (0-255) foreground color for bar elements (background is transparent).
+     * @param $with_text (string) Show Code as text below the barcode
      * @return path of image whice created
      * @protected
      */
-    protected function getBarcodePNGPath($code, $type, $w = 3, $h = 3, $color = array(0, 0, 0)) {
+    protected function getBarcodePNGPath($code, $type, $w = 3, $h = 3, $color = array(0, 0, 0), $with_text = false) {
         if (!$this->store_path) {
             $this->setStorPath(app('config')->get("barcode.store_path"));
+        }
+        if (is_null($this->ttfont)) {
+            $with_text = false;
+        } elseif ($with_text === true) {
+            $with_text = $code;
         }
         //set barcode code and type
         $this->setBarcode($code, $type);
@@ -282,16 +316,16 @@ class DNS2D {
         if (function_exists('imagecreate')) {
             // GD library
             $imagick = false;
-            $png = imagecreate($width, $height);
+            $png = imagecreate($width, $height + ($with_text ? 15 : 0));
             $bgcol = imagecolorallocate($png, 255, 255, 255);
-            imagecolortransparent($png, $bgcol);
+            if ($this->transparency) { imagecolortransparent($png, $bgcol); }
             $fgcol = imagecolorallocate($png, $color[0], $color[1], $color[2]);
         } elseif (extension_loaded('imagick')) {
             $imagick = true;
             $bgcol = new imagickpixel('rgb(255,255,255');
             $fgcol = new imagickpixel('rgb(' . $color[0] . ',' . $color[1] . ',' . $color[2] . ')');
             $png = new Imagick();
-            $png->newImage($width, $height, 'none', 'png');
+            $png->newImage($width, $height + ($with_text ? 15 : 0), ($this->transparency ? 'none' : $bgcol), 'png');
             $bar = new imagickdraw();
             $bar->setfillcolor($fgcol);
         } else {
@@ -322,6 +356,12 @@ class DNS2D {
         if ($imagick) {
             $png->drawimage($bar);
             //echo $png;
+        } else if ($with_text) {
+            // Print Text On Image
+            $tb = imagettfbbox(12, 0, $this->ttfont, $with_text);
+            $x = $tb[0] + (imagesx($png) / 2) - ($tb[4] / 2) - 0;
+            $y = imagesy($png) - 1;
+            imagettftext($png, 12, 0, $x, $y, $fgcol, $this->ttfont, $with_text);
         }
         if (ImagePng($png, $save_file)) {
             imagedestroy($png);
@@ -407,6 +447,16 @@ class DNS2D {
 
     protected function setStorPath($path) {
         $this->store_path = rtrim($path, '/' . DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+        return $this;
+    }
+
+    protected function setTransparency($boolean = true) {
+        $this->transparency = $boolean;
+        return $this;
+    }
+
+    protected function setTextFont($ttf = null) {
+        $this->ttfont = $ttf;
         return $this;
     }
 
