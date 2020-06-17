@@ -316,7 +316,7 @@ class DNS2D {
             }
             $y += $h;
         }
-        $file_name= Str::slug($code.$type);
+        $file_name= Str::slug(sha1($code).$type);
         $save_file = $this->checkfile($this->store_path . $file_name . ".png");
 
         if ($imagick) {
