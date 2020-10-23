@@ -12,7 +12,7 @@ I used the following classes of that package.
 
 [Read More on TCPDF website](http://www.tcpdf.org)
 
-# This package is compatible with Laravel `4.*` , `5.*`, `6.*` and `7.*`
+# This package is compatible with Laravel `4.*` , `5.*`, `6.*`, `7.*` and `8.*`
 
 This package relies on [php-gd](http://php.net/manual/en/book.image.php) extension. So, make sure it is installed on your machine.
 
@@ -28,7 +28,14 @@ You can also edit your project's `composer.json` file to require `milon/barcode`
 
 ```json
 "require": {
-    ...
+    "milon/barcode": "^8.0"
+}
+```
+
+For Laravel 7.* use this-
+
+```json
+"require": {
     "milon/barcode": "^7.0"
 }
 ```
@@ -37,7 +44,6 @@ For Laravel 6.* use this-
 
 ```json
 "require": {
-    ...
     "milon/barcode": "^6.0"
 }
 ```
@@ -46,7 +52,6 @@ For Laravel 5.0 and 5.1 use this-
 
 ```json
 "require": {
-    ...
     "milon/barcode": "^5.1"
 }
 ```
@@ -55,7 +60,6 @@ For Laravel 4.0, 4.1 and 4.2 use this-
 
 ```json
 "require": {
-    ...
     "milon/barcode": "^4.2"
 }
 ```
@@ -116,7 +120,7 @@ For version 4.2 alias will be like this-
 )
 ```
 
-Bar-code generator like Qr Code, PDF417, C39,C39+, C39E,C39E+, C93, S25,S25+, I25,I25+, C128,C128A,C128B,C128C, 2-Digits UPC-Based Extention, 5-Digits UPC-Based Extention, EAN 8,EAN 13, UPC-A,UPC-E, MSI (Variation of Plessey code)
+Bar-code generator like Qr Code, PDF417, C39, C39+, C39E, C39E+, C93, S25, S25+, I25, I25+, C128, C128A, C128B, C128C, 2-Digits UPC-Based Extention, 5-Digits UPC-Based Extention, EAN 8, EAN 13, UPC-A, UPC-E, MSI (Variation of Plessey code)
 
 generator in html, png embedded base64 code and SVG canvas
 
